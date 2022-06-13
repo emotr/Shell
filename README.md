@@ -1,2 +1,2 @@
 # Shell
-Egen implementasjon av shell skrevet i C. Basert på oppgave fra Operating Systems bok
+Egen implementasjon av shell skrevet i C. Basert på prosjekt fra Operating Systems Internals and Design Principles
