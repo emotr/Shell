@@ -36,9 +36,7 @@ int main(int argc, char **argv[]){
 
 /** Fjern ubrukt space i input string så man kan sammenligne stringer  */
 void trimString(char str[]){
-	int index, i;
-	index = -1;
-	i = 0;
+	int index = -1, i = 0;
 	while(str[i] != '\0'){
 		if (str[i] != ' ' && str[i] != '\t' && str[i] != '\n')
 			index = i;
@@ -49,7 +47,10 @@ void trimString(char str[]){
 }
 
 void parseInput(char command[]){
-	getCurrentPath();
+	if (strcmp(command, "pwd") == 0)
+		getCurrentPath();
+	else 
+		printf("%s\n", command);	
 }
 
 int getCurrentPath(){
