@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
@@ -7,9 +8,15 @@
 #define MAX_BUFFER 200
 #endif
 
-void trimString(char[]);
-void parseInput(char[]);
-int getCurrentPath();
+char currentPath[MAX_BUFFER];  		/** Lagre hele filsti  */
+char currentPathShort[MAX_BUFFER]; 	/** Lagre bare katalogen man er i  */
+
+void trimString(char[]); 		/** Fjern ubrukt space i input string så man kan sammenligne stringer  */
+void parseInput(char[]); 		/** Håndter input */
+void getCurrentPath(); 			/** Lagrer den nåværende stien i currentPath  */
+void printPath(); 				/** Printer den nåværende stien */
+void trimPath();				/** Fjern alt bortsett fra nåværende katalog og lagre i currentPathShort  */
+int changeDirectory(char[]);  	/** Endre katalog prosessen er i */
 
 int main(int argc, char **argv[]){
 	char command[50];
@@ -17,11 +24,12 @@ int main(int argc, char **argv[]){
 	int loopControl = 1;
 
 	while (loopControl) {
-		printf("> ");
+		getCurrentPath();
+		trimPath();
+		printf("[%s] > ", currentPathShort);
 		fgets(command, sizeof(command), stdin); // les string
 		trimString(command);
 		
-
 		if (strcmp(command, quit) == 0){
 			printf("Program exiting\n");
 			loopControl = 0;
@@ -43,29 +51,58 @@ void trimString(char str[]){
 		i++;
 	}
 
-	str[index + 1] = '\0';
+	str[index + 1] = '\0'; // Legg til avsluttende karakter
 }
 
 void parseInput(char command[]){
 	if (strcmp(command, "pwd") == 0)
-		getCurrentPath();
+		printPath();
 	else 
 		printf("%s\n", command);	
 }
 
-int getCurrentPath(){
-	char path[MAX_BUFFER];
+void getCurrentPath(){
 	errno = 0;
-	if (getcwd(path, MAX_BUFFER) == NULL){
+	if (getcwd(currentPath, MAX_BUFFER) == NULL){
 		if (errno == ERANGE)
-			printf("[ERROR] pathname length exceeds the buffer size");
+			printf("[ERROR] pathname length exceeds the buffer size\n");
 		else 
-			perror("getcwd");
-		return 1;
+			perror("[ERROR] getcwd\n");
+		exit(1);
 	}	
 
-	getcwd(path, MAX_BUFFER);
-	printf("%s\n", path);
+	getcwd(currentPath, MAX_BUFFER);
+}
 
+void printPath(){
+	printf("%s\n", currentPath);
+}
+
+void trimPath(){
+	int flag = -1, i = 0;
+	while (currentPath[i] != '\0'){
+		if (currentPath[i] == '/'){
+			flag = i;
+		}
+
+		i++;
+	}
+
+	if (flag == -1){
+		return;
+	}
+
+	i = 0;
+	while (currentPath[i] != '\0'){
+		currentPathShort[i] = currentPath[flag + i + 1];	
+		i++;
+	}
+
+	currentPathShort[i] = '\0'; // Legg til avsluttende karakter
+}
+
+int changeDirectory(char newDirectory[]){
+	
+	
 	return 0;
 }
