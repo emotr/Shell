@@ -107,10 +107,9 @@ void trimPath(){
 int changeDirectory(char newDirectory[]){
 	newDirectory += 3; // Fjern "cd " fra string for å sammenligne stringer
 
-	if (strcmp(newDirectory, "..") == 0)
-		chdir("..");
-	if (strcmp(newDirectory, "/usr") == 0){
-		chdir("/usr");
+	if (chdir(newDirectory) != 0){
+		printf("%s is not a directory\n", newDirectory);
+		return -1;
 	}
 	
 	return 0;
