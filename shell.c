@@ -57,6 +57,8 @@ void trimString(char str[]){
 void parseInput(char command[]){
 	if (strcmp(command, "pwd") == 0)
 		printPath();
+	else if (strncmp(command, "cd ", 2) == 0)
+		changeDirectory(command);
 	else 
 		printf("%s\n", command);	
 }
@@ -101,8 +103,15 @@ void trimPath(){
 	currentPathShort[i] = '\0'; // Legg til avsluttende karakter
 }
 
+// Endre katalog prosessen er i 
 int changeDirectory(char newDirectory[]){
-	
+	newDirectory += 3; // Fjern "cd " fra string for å sammenligne stringer
+
+	if (strcmp(newDirectory, "..") == 0)
+		chdir("..");
+	if (strcmp(newDirectory, "/usr") == 0){
+		chdir("/usr");
+	}
 	
 	return 0;
 }
