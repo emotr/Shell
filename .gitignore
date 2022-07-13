@@ -1,0 +1,23 @@
+# Objektfiler
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Prekompilerte headers
+*.gch
+*.pch
+
+# Biblioteker
+*.lib
+*.a
+*.la
+*.lo
+
+# Kjørbare filer
+*.out
