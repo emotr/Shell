@@ -3,6 +3,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #ifndef MAX_BUFFER
 #define MAX_BUFFER 200
@@ -11,12 +14,13 @@
 char currentPath[MAX_BUFFER];  		/** Lagre hele filsti  */
 char currentPathShort[MAX_BUFFER]; 	/** Lagre bare katalogen man er i  */
 
-void trimString(char[]); 		/** Fjern ubrukt space i input string så man kan sammenligne stringer  */
-void parseInput(char[]); 		/** Håndter input */
-void getCurrentPath(); 			/** Lagrer den nåværende stien i currentPath  */
-void printPath(); 				/** Printer den nåværende stien */
-void trimPath();				/** Fjern alt bortsett fra nåværende katalog og lagre i currentPathShort  */
-int changeDirectory(char[]);  	/** Endre katalog prosessen er i */
+void trimString(char[]); 			/** Fjern ubrukt space i input string så man kan sammenligne stringer  */
+void parseInput(char[]); 			/** Håndter input */
+void getCurrentPath(); 				/** Lagrer den nåværende stien i currentPath  */
+void printPath(); 					/** Printer den nåværende stien */
+void trimPath();					/** Fjern alt bortsett fra nåværende katalog og lagre i currentPathShort  */
+void changeDirectory(char[]);  		/** Endre katalog prosessen er i */
+void printDirectoryContents();		/** Skrive ut alt i nåværende katalog (ls -la)  */
 
 int main(int argc, char **argv[]){
 	char command[50];
@@ -26,7 +30,7 @@ int main(int argc, char **argv[]){
 	while (loopControl) {
 		getCurrentPath();
 		trimPath();
-		printf("[%s] > ", currentPathShort);
+		printf("[%s]> ", currentPathShort);
 		fgets(command, sizeof(command), stdin); // les string
 		trimString(command);
 		
@@ -54,20 +58,24 @@ void trimString(char str[]){
 	str[index + 1] = '\0'; // Legg til avsluttende karakter
 }
 
+/** Håndter input  */
 void parseInput(char command[]){
 	if (strcmp(command, "pwd") == 0)
 		printPath();
 	else if (strncmp(command, "cd ", 2) == 0)
 		changeDirectory(command);
+	else if (strcmp(command, "ls") == 0)
+		printDirectoryContents();
 	else 
-		printf("%s\n", command);	
+		printf("%s command not found!\n", command);	
 }
 
+/** Lagrer den nåværende stien i currentPath  */
 void getCurrentPath(){
 	errno = 0;
 	if (getcwd(currentPath, MAX_BUFFER) == NULL){
 		if (errno == ERANGE)
-			printf("[ERROR] pathname length exceeds the buffer size\n");
+			perror("[ERROR] pathname length exceeds the buffer size\n");
 		else 
 			perror("[ERROR] getcwd\n");
 		exit(1);
@@ -76,23 +84,23 @@ void getCurrentPath(){
 	getcwd(currentPath, MAX_BUFFER);
 }
 
+/* Printer den nåværende stien  */
 void printPath(){
 	printf("%s\n", currentPath);
 }
 
+/** Fjern alt bortsett fra nåværende katalog og lagre i currentPathShort */
 void trimPath(){
 	int flag = -1, i = 0;
 	while (currentPath[i] != '\0'){
-		if (currentPath[i] == '/'){
+		if (currentPath[i] == '/')
 			flag = i;
-		}
 
 		i++;
 	}
 
-	if (flag == -1){
+	if (flag == -1)
 		return;
-	}
 
 	i = 0;
 	while (currentPath[i] != '\0'){
@@ -104,13 +112,25 @@ void trimPath(){
 }
 
 // Endre katalog prosessen er i 
-int changeDirectory(char newDirectory[]){
+void changeDirectory(char newDirectory[]){
 	newDirectory += 3; // Fjern "cd " fra string for å sammenligne stringer
 
-	if (chdir(newDirectory) != 0){
+	if (chdir(newDirectory) != 0)
 		printf("%s is not a directory\n", newDirectory);
-		return -1;
+}
+
+void printDirectoryContents(){
+	DIR *dir;
+	struct dirent *file;
+	struct stat mystat;
+
+	char buf[512];
+	dir = opendir(".");
+
+	while((file = readdir(dir)) != NULL){
+		stat(file->d_name, &mystat);
+		printf("%zu", mystat.st_size);
+		printf(" %s\n", file->d_name);
 	}
-	
-	return 0;
+	closedir(dir);
 }
